@@ -1,0 +1,213 @@
+- hosts: localhost
+  vars:
+    tenantname: "CLEUR_Tenant"
+    vrfname: "CLEUR_vrf"
+    bd1name: "CLEUR_bd1"
+    bd1gateway: "192.168.1.1"
+    bd1mask: "24"
+    bd2name: "CLEUR_bd2"
+    bd2gateway: "192.168.2.1"
+    bd2mask: "24"
+    apname: "CLEUR_ap"
+    epg1name: "CLEUR_egp1"
+    epg2name: "CLEUR_egp2"
+    contractname: "CLEUR_contract"
+    subjecttname: "CLEUR_subject"
+    filtername: "CLEUR_filter"
+    filterentryname: "CLEUR_filter_entry"
+  tasks:
+  - name: Add a new Tenant
+    aci_tenant:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      tenant: "{{tenantname}}"
+      validate_certs: False
+      state: present
+
+  - name: Add a new VRF
+    aci_vrf:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      tenant: "{{tenantname}}"
+      vrf: "{{vrfname}}"
+      descr: Ansible VRF
+      policy_control_preference: enforced
+      policy_control_direction: ingress
+      validate_certs: False
+      state: present
+
+  - name: Add a new Bridge Domain 1
+    aci_bd:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      tenant: "{{tenantname}}"
+      bd: "{{bd1name}}"
+      vrf: "{{vrfname}}"
+      validate_certs: False
+      state: present
+
+  - name: Add subnet to new Bridge Domain 1
+    aci_bd_subnet:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      tenant: "{{tenantname}}"
+      bd: "{{bd1name}}"
+      gateway: "{{bd1gateway}}"
+      mask: "{{bd1mask}}"
+      scope: [public, shared]
+      validate_certs: False
+      state: present
+
+  - name: Create Application Profile
+    aci_ap:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      tenant: "{{tenantname}}"
+      ap: "{{apname}}"
+      description: Ansible Application Profile
+      validate_certs: False
+      state: present
+
+  - name: Add a new EPG 1
+    aci_epg:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      tenant: "{{tenantname}}"
+      ap: "{{apname}}"
+      epg: "{{epg1name}}"
+      description: ANSIBLE EPG
+      bd: "{{bd1name}}"
+      validate_certs: False
+      state: present
+
+  - name: Add a new Bridge Domain 2
+    aci_bd:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      tenant: "{{tenantname}}"
+      bd: "{{bd2name}}"
+      vrf: "{{vrfname}}"
+      validate_certs: False
+      state: present
+
+  - name: Add subnet to new Bridge Domain 2
+    aci_bd_subnet:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      tenant: "{{tenantname}}"
+      bd: "{{bd2name}}"
+      gateway: "{{bd2gateway}}"
+      mask: "{{bd2mask}}"
+      scope: [public, shared]
+      validate_certs: False
+      state: present
+
+  - name: Add a new EPG 1
+    aci_epg:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      tenant: "{{tenantname}}"
+      ap: "{{apname}}"
+      epg: "{{epg2name}}"
+      description: ANSIBLE EPG
+      bd: "{{bd2name}}"
+      validate_certs: False
+      state: present
+
+  - name: New Contract
+    aci_contract:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      contract: "{{contractname}}"
+      tenant: "{{tenantname}}"
+      description: Contract created by Ansible
+      scope: tenant
+      validate_certs: False
+      state: present
+  
+  - name: New Contract Subject
+    aci_contract_subject:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      contract: "{{contractname}}"
+      tenant: "{{tenantname}}"
+      subject: "{{subjecttname}}"
+      reverse_filter: yes
+      description: Subject created by Ansible
+      validate_certs: False
+      state: present
+
+  - name: New filter icmp
+    aci_filter:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      filter: "{{filtername}}"
+      tenant: "{{tenantname}}"
+      description: Filter created by Ansible
+      validate_certs: False
+      state: present
+
+  - name: New filter entry icmp
+    aci_filter_entry:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      filter: "{{filtername}}"
+      tenant: "{{tenantname}}"
+      entry: "{{filterentryname}}"
+      ether_type: ip
+      ip_protocol: icmp
+      icmp_msg_type: unspecified
+      description: Entry created by Ansible
+      validate_certs: False
+      state: present
+
+  - name: Add filter to subject icmp
+    aci_contract_subject_to_filter:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      contract: "{{contractname}}"
+      filter: "{{filtername}}"
+      tenant: "{{tenantname}}"
+      subject: "{{subjecttname}}"
+      validate_certs: False
+      state: present
+
+  - name: Add contract to consumer
+    aci_epg_to_contract:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      contract: "{{contractname}}"
+      ap: "{{apname}}"
+      epg: "{{epg1name}}"
+      contract_type: consumer
+      tenant: "{{tenantname}}"
+      validate_certs: False
+      state: present
+
+  - name: Add contract to provider
+    aci_epg_to_contract:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      contract: "{{contractname}}"
+      ap: "{{apname}}"
+      epg: "{{epg2name}}"
+      contract_type: provider
+      tenant: "{{tenantname}}"
+      validate_certs: False
+      state: present

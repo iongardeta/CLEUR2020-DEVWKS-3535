@@ -1,0 +1,13 @@
+- hosts: localhost
+  vars:
+    tenantname: "CLEUR_Tenant"
+  tasks:
+  - name: Delete Tenant
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}.json"
+      content: {"fvTenant":{"attributes":{"dn":"uni/tn-{{tenantname}}","status":"deleted"},"children":[]}}
+      validate_certs: False

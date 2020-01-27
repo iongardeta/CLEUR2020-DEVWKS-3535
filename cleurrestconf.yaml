@@ -1,0 +1,127 @@
+- hosts: localhost
+  vars:
+    tenantname: "CLEUR_Tenant"
+    vrfname: "CLEUR_vrf"
+    bd1name: "CLEUR_bd1"
+    bd1gateway: "192.168.1.1"
+    bd1mask: "24"
+    bd2name: "CLEUR_bd2"
+    bd2gateway: "192.168.2.1"
+    bd2mask: "24"
+    apname: "CLEUR_ap"
+    epg1name: "CLEUR_egp1"
+    epg2name: "CLEUR_egp2"
+    contractname: "CLEUR_contract"
+    subjecttname: "CLEUR_subject"
+    filtername: "CLEUR_filter"
+    filterentryname: "CLEUR_filter_entry"
+  tasks:
+  - name: Add a new Tenant
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}.json"
+      content: {"fvTenant":{"attributes":{"dn":"uni/tn-{{tenantname}}","name":"{{tenantname}}","rn":"tn-{{tenantname}}","status":"created,modified"},"children":[]}}
+      validate_certs: False
+
+  - name: Add a new VRF
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}/ctx-{{vrfname}}.json"
+      content: {"fvCtx":{"attributes":{"dn":"uni/tn-{{tenantname}}/ctx-{{vrfname}}","name":"{{vrfname}}","rn":"ctx-{{vrfname}}","status":"created,modified"},"children":[]}}
+      validate_certs: False
+
+  - name: Add a new Bridge Domain 1 and subnet
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}/BD-{{bd1name}}.json"
+      content: {"fvBD":{"attributes":{"dn":"uni/tn-{{tenantname}}/BD-{{bd1name}}","mac":"00:22:BD:F8:19:FF","name":"{{bd1name}}","rn":"BD-{{bd1name}}","status":"created,modified"},"children":[{"fvSubnet":{"attributes":{"dn":"uni/tn-{{tenantname}}/BD-{{bd1name}}/subnet-[{{bd1gateway}}/{{bd1mask}}]","ctrl":"","ip":"{{bd1gateway}}/{{bd1mask}}","rn":"subnet-[{{bd1gateway}}/{{bd1mask}}]","status":"created,modified"},"children":[]}},{"fvRsCtx":{"attributes":{"tnFvCtxName":"{{vrfname}}","status":"created,modified"},"children":[]}}]}}
+      validate_certs: False
+
+  - name: Create Application Profile
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}/ap-{{apname}}.json"
+      content: {"fvAp":{"attributes":{"dn":"uni/tn-{{tenantname}}/ap-{{apname}}","name":"{{apname}}","rn":"ap-{{apname}}","status":"created,modified"},"children":[]}}
+      validate_certs: False
+
+  - name: Add a new EPG 1
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}/ap-{{apname}}/epg-{{epg1name}}.json"
+      content: {"fvAEPg":{"attributes":{"dn":"uni/tn-{{tenantname}}/ap-{{apname}}/epg-{{epg1name}}","name":"{{epg1name}}","rn":"epg-{{epg1name}}","status":"created,modified"},"children":[{"fvRsBd":{"attributes":{"tnFvBDName":"{{bd1name}}","status":"created,modified"},"children":[]}}]}}
+      validate_certs: False
+
+  - name: Add a new Bridge Domain 2 and subnet
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}/BD-{{bd2name}}.json"
+      content: {"fvBD":{"attributes":{"dn":"uni/tn-{{tenantname}}/BD-{{bd2name}}","mac":"00:22:BD:F8:19:FF","name":"{{bd2name}}","rn":"BD-{{bd2name}}","status":"created,modified"},"children":[{"fvSubnet":{"attributes":{"dn":"uni/tn-{{tenantname}}/BD-{{bd2name}}/subnet-[{{bd2gateway}}/{{bd2mask}}]","ctrl":"","ip":"{{bd2gateway}}/{{bd2mask}}","rn":"subnet-[{{bd2gateway}}/{{bd2mask}}]","status":"created,modified"},"children":[]}},{"fvRsCtx":{"attributes":{"tnFvCtxName":"{{vrfname}}","status":"created,modified"},"children":[]}}]}}
+      validate_certs: False
+
+  - name: Add a new EPG 2
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}/ap-{{apname}}/epg-{{epg2name}}.json"
+      content: {"fvAEPg":{"attributes":{"dn":"uni/tn-{{tenantname}}/ap-{{apname}}/epg-{{epg2name}}","name":"{{epg2name}}","rn":"epg-{{epg2name}}","status":"created,modified"},"children":[{"fvRsBd":{"attributes":{"tnFvBDName":"{{bd2name}}","status":"created,modified"},"children":[]}}]}}
+      validate_certs: False
+
+  - name: New filter icmp and entry
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}/flt-{{filtername}}.json"
+      content: {"vzFilter":{"attributes":{"dn":"uni/tn-{{tenantname}}/flt-{{filtername}}","name":"{{filtername}}","rn":"flt-{{filtername}}","status":"created,modified"},"children":[{"vzEntry":{"attributes":{"dn":"uni/tn-{{tenantname}}/flt-{{filtername}}/e-{{filterentryname}}","name":"{{filterentryname}}","etherT":"ip","prot":"icmp","rn":"e-{{filterentryname}}","status":"created,modified"},"children":[]}}]}}
+      validate_certs: False
+
+  - name: New Contract, subject, and add filter entry
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}/brc-{{contractname}}.json"
+      content: {"vzBrCP":{"attributes":{"dn":"uni/tn-{{tenantname}}/brc-{{contractname}}","name":"{{contractname}}","rn":"brc-{{contractname}}","status":"created,modified"},"children":[{"vzSubj":{"attributes":{"dn":"uni/tn-{{tenantname}}/brc-{{contractname}}/subj-{{subjecttname}}","name":"{{subjecttname}}","rn":"subj-{{subjecttname}}","status":"created,modified"},"children":[{"vzRsSdwanPol":{"attributes":{"tDn":"uni/tn-common/sdwanpolcont/sdwanslapol-","status":"created,modified"},"children":[]}},{"vzRsSubjFiltAtt":{"attributes":{"status":"created,modified","tnVzFilterName":"{{filtername}}","directives":"none"},"children":[]}}]}}]}}
+      validate_certs: False
+
+  - name: Add contract to consumer
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}/ap-{{apname}}/epg-{{epg1name}}.json"
+      content: {"fvRsCons":{"attributes":{"tnVzBrCPName":"{{contractname}}","status":"created,modified"},"children":[]}}
+      validate_certs: False
+
+  - name: Add contract to provider
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}/ap-{{apname}}/epg-{{epg2name}}.json"
+      content: {"fvRsProv":{"attributes":{"tnVzBrCPName":"{{contractname}}","status":"created,modified"},"children":[]}}
+      validate_certs: False

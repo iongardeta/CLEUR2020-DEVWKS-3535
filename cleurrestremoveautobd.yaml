@@ -1,0 +1,35 @@
+- hosts: localhost
+  vars:
+    tenantname: "CLEUR_Tenant"
+    apname: "CLEUR_ap"
+    epgname: "CLEUR_egp1"
+  tasks:
+  - name: Querying BD of {{epgname}}
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: get
+      path: "/api/node/mo/uni/tn-{{tenantname}}/ap-{{apname}}/epg-{{epgname}}.json?query-target=children&target-subtree-class=fvRsBd"
+      validate_certs: False
+    register: var1
+
+  - name: Removing {{epgname}}
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-{{tenantname}}/ap-{{apname}}/epg-{{epgname}}.json"
+      content: {"fvAEPg":{"attributes":{"dn":"uni/tn-{{tenantname}}/ap-{{apname}}/epg-{{epgname}}","status":"deleted"},"children":[]}}
+      validate_certs: False
+
+  - name: Removing BD {{var1.imdata[0].fvRsBd.attributes.tnFvBDName}}
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: post
+      path: "/api/node/mo/uni/tn-CLEUR_Tenant/BD-{{var1.imdata[0].fvRsBd.attributes.tnFvBDName}}.json"
+      content: {"fvBD":{"attributes":{"dn":"uni/tn-{{tenantname}}/BD-{{var1.imdata[0].fvRsBd.attributes.tnFvBDName}}","status":"deleted"},"children":[]}}
+      validate_certs: False

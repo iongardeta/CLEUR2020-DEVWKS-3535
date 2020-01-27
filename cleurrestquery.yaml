@@ -1,0 +1,16 @@
+- hosts: localhost
+  tasks:
+  - name: Querying URL
+    aci_rest:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      method: get
+      path: "{{pathurl}}"
+      validate_certs: False
+    register: var1
+    delegate_to: localhost
+
+  - name: Print query
+    debug:
+      msg: "{{ var1 }}"

@@ -1,0 +1,12 @@
+- hosts: localhost
+  vars:
+    tenantname: "CLEUR_Tenant"
+  tasks:
+  - name: Remove Tenant
+    aci_tenant:
+      hostname: "{{IPapic}}"
+      username: "{{userapic}}"
+      password: "{{passapic}}"
+      tenant: "{{tenantname}}"
+      validate_certs: False
+      state: absent
