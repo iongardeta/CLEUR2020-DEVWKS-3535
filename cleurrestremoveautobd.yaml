@@ -30,6 +30,6 @@
       username: "{{userapic}}"
       password: "{{passapic}}"
       method: post
-      path: "/api/node/mo/uni/tn-CLEUR_Tenant/BD-{{var1.imdata[0].fvRsBd.attributes.tnFvBDName}}.json"
+      path: "/api/node/mo/uni/tn-{{tenantname}}/BD-{{var1.imdata[0].fvRsBd.attributes.tnFvBDName}}.json"
       content: {"fvBD":{"attributes":{"dn":"uni/tn-{{tenantname}}/BD-{{var1.imdata[0].fvRsBd.attributes.tnFvBDName}}","status":"deleted"},"children":[]}}
       validate_certs: False
