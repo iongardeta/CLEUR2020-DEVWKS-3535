@@ -1,0 +1,29 @@
+ACI GUI: https://sandboxapicdc.cisco.com
+ANSIBLE DOCUMENTATION: https://docs.ansible.com/ansible/latest/modules/list_of_network_modules.html
+ACI REST API DOCUMENTATION: https://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/2-x/rest_cfg/2_1_x/b_Cisco_APIC_REST_API_Configuration_Guide/b_Cisco_APIC_REST_API_Configuration_Guide_chapter_01.html
+
+Ansible Playbooks
+
+- Running playbook to configure Tenant,EPGs, BDs, and Contracts with ansible modules (no rest module)
+ansible-playbook cleurmodulesconf.yaml -e IPapic="sandboxapicdc.cisco.com" -e userapic="admin" -e passapic="*********"
+
+- Remove tenant with ansible module a tenant (no rest module)
+ansible-playbook cleurmoduleremovetenant.yaml -e IPapic="sandboxapicdc.cisco.com" -e userapic="admin" -e passapic="*********"
+
+- Running playbook with ansible rest to configure Tenant,EPGs, BDs, and Contracts
+ansible-playbook cleurrestconf.yaml -e IPapic="sandboxapicdc.cisco.com" -e userapic="admin" -e passapic="*********"
+
+- Remove tenant with ansible rest
+ansible-playbook cleurrestremovetenant.yaml -e IPapic="sandboxapicdc.cisco.com" -e userapic="admin" -e passapic="*********"
+
+- Running again playbook to configure Tenant,EPGs, BDs, and Contracts
+ansible-playbook cleurrestconf.yaml -e IPapic="sandboxapicdc.cisco.com" -e userapic="admin" -e passapic="*********"
+
+- Query the EPG params by REST
+ansible-playbook cleurrestquery.yaml -e IPapic="sandboxapicdc.cisco.com" -e userapic="admin" -e passapic="*********" -e pathurl="/api/node/mo/uni/tn-CLEUR_Tenant/ap-CLEUR_ap/epg-CLEUR_egp1.json?query-target=children&target-subtree-class=fvRsBd"
+
+- Query the EPG params by REST and selecting only the BD in an specific EPG
+ansible-playbook cleurrestquerynested.yaml -e IPapic="sandboxapicdc.cisco.com" -e userapic="admin" -e passapic="*********" -e pathurl="sandboxapicdc.cisco.com" -e userapic="admin" -e passapic="ciscopsdt" -e pathurl="/api/node/mo/uni/tn-CLEUR_Tenant/ap-CLEUR_ap/epg-CLEUR_egp1.json?query-target=children&target-subtree-class=fvRsBd"
+
+- Running playbook to automate the BD removal
+ansible-playbook cleurrestremoveautobd.yaml -e IPapic="sandboxapicdc.cisco.com" -e userapic="admin" -e passapic="*********"
